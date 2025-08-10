@@ -7,6 +7,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 import dotenv from "dotenv";
 
 import authRoutes from './routes/authentication.js'
+import quizRoutes from './routes/quiz.js'
 
 dotenv.config({ quiet: true });
 
@@ -21,6 +22,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 
 app.use("/auth", authRoutes)
+app.use("/quiz", quizRoutes)
 
 const wss = new WebSocketServer({ server })
 
