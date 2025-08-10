@@ -5,8 +5,14 @@ const prisma = new PrismaClient()
 export const findUserByEmail = async (email) => {
   return await prisma.user.findUnique({
     where: { email },
-  });
-};
+  })
+}
+
+export const findUserByName = async (name) => {
+  return await prisma.user.findUnique({
+    where: { name },
+  })
+}
 
 export const createUser = async (email, password, name) => {
   return await prisma.user.create({
@@ -15,6 +21,17 @@ export const createUser = async (email, password, name) => {
       password,
       name,
     },
+  })
+}
+
+export const addGuestUser = async (name) => {
+  return await prisma.guest.create({})
+}
+
+export const addGuestName = async (guestId, name) => {
+  return await prisma.guest.update({
+    where: { id: guestId },
+    data: { name },
   })
 }
 

@@ -2,7 +2,7 @@ import { Router } from "express"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv";
-import { createUser, findUserByEmail } from "../db/queries.js";
+import { createUser, findUserByEmail, findUserByName } from "../db/queries.js";
 
 dotenv.config({ quiet: true });
 
@@ -16,6 +16,9 @@ router.post("/signup",async(req,res)=>{
         const hashedPassword = await bcrypt.hash(password, 10)
         if(await findUserByEmail(email)){
             return res.status(400).json({ message: "User already exists" })
+        }
+        if(await findUserByName(name)){
+            return res.status(400).json({ message: "Name already exists" })
         }
         await createUser(email, hashedPassword, name)
         res.status(201).json({ message: "User created successfully" })
@@ -40,7 +43,8 @@ router.post("/signin",async(req,res)=>{
         const token = jwt.sign({ email: user.email }, JWT_SECRET)
         res.status(200).json({ 
             token,
-            name: user.name
+            name: user.name,
+            id: user.id
          })
     }
     catch(err){
