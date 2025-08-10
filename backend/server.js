@@ -3,11 +3,11 @@ import { createServer } from 'http'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
-import { WebSocketServer, WebSocket } from 'ws'
 import dotenv from "dotenv";
 
 import authRoutes from './routes/authentication.js'
 import quizRoutes from './routes/quiz.js'
+import initWebSocket from './websocket/ws.js'
 
 dotenv.config({ quiet: true });
 
@@ -24,8 +24,7 @@ app.use(express.json())
 app.use("/auth", authRoutes)
 app.use("/quiz", quizRoutes)
 
-const wss = new WebSocketServer({ server })
-
+initWebSocket(server)
 
 server.listen(PORT, () => {
   console.log(`Server running on PORT ${PORT}`)
