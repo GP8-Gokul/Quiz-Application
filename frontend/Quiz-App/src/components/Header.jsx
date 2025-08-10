@@ -3,8 +3,8 @@ import { ROUTES } from "../routes/routes";
 
 export default function Header() {
   return (
-    <header className="flex flex-row justify-between p-4 bg-[#e8e0e084] text-black">
-      <h1 className="text-xl font-bold text-[#162fd5]">
+    <header className="flex flex-row justify-between p-4 bg-[#fcf9f9f6] text-black">
+      <h1 className="text-xl font-bold text-[#162fd5] ">
         Quiz Application
         <Link to={ROUTES.LANDING_PAGE}></Link>
       </h1>

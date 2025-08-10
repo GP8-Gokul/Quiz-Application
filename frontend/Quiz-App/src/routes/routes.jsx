@@ -1,4 +1,6 @@
 export const ROUTES = {
     LANDING_PAGE : '/',
-    AUTH : '/auth'
+    AUTH_PAGE : '/auth',
+    QUIZ_PAGE : '/quiz',
 };
+
