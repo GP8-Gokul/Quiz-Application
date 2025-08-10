@@ -1,21 +1,30 @@
-const express = require('express')
-const http = require('http')
-const cors = require('cors')
-const helmet = require('helmet')
-const morgan = require('morgan')
-const {WebSocketServer,WebSocket} = require('ws')
-require('dotenv').config()
+import express from 'express'
+import { createServer } from 'http'
+import cors from 'cors'
+import helmet from 'helmet'
+import morgan from 'morgan'
+import { WebSocketServer, WebSocket } from 'ws'
+import dotenv from "dotenv";
+
+import authRoutes from './routes/authentication.js'
+
+dotenv.config({ quiet: true });
+
+const PORT = process.env.PORT || 3000
 
 const app = express()
-const server = http.createServer(app)
+const server = createServer(app)
 
 app.use(cors())
 app.use(helmet())
-app.use(morgan('dev'));
+app.use(morgan('dev'))
+app.use(express.json())
+
+app.use("/auth", authRoutes)
 
 const wss = new WebSocketServer({ server })
 
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running on PORT ${server.address().port}`)
+server.listen(PORT, () => {
+  console.log(`Server running on PORT ${PORT}`)
 })
