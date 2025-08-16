@@ -95,7 +95,7 @@ export default function LandingPage() {
                 value={digit}
                 onKeyDown={e => handleKeyDown(e, idx)}
                 onChange={(e) => handleCodeChange(e, idx)}
-                className="p-2 border border-gray-300 rounded w-7 h-8  md:w-12 text-center hover:border-blue-500"
+                className="p-2 border border-gray-300 rounded w-7 h-8  md:w-12 md:h-10 text-center hover:border-blue-500"
               />
               {idx == 3 ? <span className="mx-2"> -</span> : null}
             </span>

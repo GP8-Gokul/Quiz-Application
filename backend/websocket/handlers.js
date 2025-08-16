@@ -19,8 +19,12 @@ const handleJoinRoom = async (data, ws) => {
                 ws.send(JSON.stringify({ type: "error", message: "Name already taken" }))
                 return
             }
+            name = name + ' (guest)'
             room.participants.push([ws, playerId, name, score=0])
             await addGuestName(guest.id, name)
+        }
+        else{
+            room.participants.push([ws, playerId, name, score=0])
         }
         ws.send(JSON.stringify({ type: "room-joined", quizName: room.quizName }))
         room.admin.send(JSON.stringify({ 
