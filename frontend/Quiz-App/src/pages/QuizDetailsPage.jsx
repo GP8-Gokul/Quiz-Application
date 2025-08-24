@@ -25,9 +25,9 @@ export default function QuizDetailsPage() {
   }, [])
 
   const handleGotoRoom = () => {
-    navigate(ROUTES.ADMIN_PAGE.replace(':quiz', quiz)).replace()
+    navigate(ROUTES.ADMIN_PAGE.replace(':slug', quiz.slug))
   }
-  
+
 
   if (!quiz) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading quiz...</div>

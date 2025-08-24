@@ -10,7 +10,7 @@ const initWebSocket = (server) => {
             let data
             try{
                 data = JSON.parse(message)
-                console.log("Received message:", data)
+                console.log(`Received message of type: ${data.type} from ${req.socket.remoteAddress}`)
             } catch (error) {
                 console.error("Invalid JSON:", error)
                 return

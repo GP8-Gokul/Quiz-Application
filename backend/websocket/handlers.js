@@ -5,8 +5,9 @@ const rooms = new Map();
 
 const handleCreateRoom = (data, ws) => {
     const roomId = generateUniqueId()
-    const quizName = data.quizName || "Untitled Quiz"
-    rooms.set(roomId, { id: roomId, participants: [], admin: ws, quizName })
+    const title = data.title
+    const questions = data.questions
+    rooms.set(roomId, { id: roomId, participants: [], admin: ws, title, questions })
     ws.send(JSON.stringify({ type: "room-created", roomId }))
 }
 
@@ -14,21 +15,15 @@ const handleJoinRoom = async (data, ws) => {
     const { roomId,playerId,name } = data
     const room = rooms.get(roomId)
     if (room) {
-        if(data.userType == 'guest'){
             if (room.participants.some(participant => participant[2] === name)) {
                 ws.send(JSON.stringify({ type: "error", message: "Name already taken" }))
                 return
             }
-            name = name + ' (guest)'
             room.participants.push([ws, playerId, name, score=0])
-            await addGuestName(guest.id, name)
-        }
-        else{
-            room.participants.push([ws, playerId, name, score=0])
-        }
+
         ws.send(JSON.stringify({ type: "room-joined", quizName: room.quizName }))
         room.admin.send(JSON.stringify({ 
-            type: "new-participant", 
+            type: "participant-joined", 
             participant: {
                 id: playerId,
                 name: name,

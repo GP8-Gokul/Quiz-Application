@@ -24,14 +24,9 @@ export const createUser = async (email, password, name) => {
   })
 }
 
-export const addGuestUser = async (name) => {
-  return await prisma.guest.create({})
-}
-
-export const addGuestName = async (guestId, name) => {
-  return await prisma.guest.update({
-    where: { id: guestId },
-    data: { name },
+export const addParticipant = async (name) => {
+  return await prisma.participant.create({
+    data: { name }
   })
 }
 
