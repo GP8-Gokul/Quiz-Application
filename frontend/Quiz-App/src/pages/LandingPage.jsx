@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "../routes/routes";
 import { useEffect, useRef, useState } from "react";
+import { useSocket } from "../contexts/SocketContex";
 
 export default function LandingPage() {
 
@@ -12,6 +13,8 @@ export default function LandingPage() {
 
   const [showCodeError, setShowCodeError] = useState(false)
   const [codeError,setCodeError] = useState('')
+
+  const socket = useSocket()
 
   useEffect(() => {
     codeRefs.current[0].focus()
@@ -56,7 +59,25 @@ export default function LandingPage() {
     const userName = nameRef.current.value
 
     if (quizCode.length === 8 && userName) {
-      navigate(ROUTES.QUIZ_PAGE)
+      socket.send(JSON.stringify({
+        type: "join-room",
+        roomId: quizCode,
+        name: userName
+      }))
+
+      socket.addEventListener("message", (event) => {
+        const data = JSON.parse(event.data)
+        if (data.type === "room-joined") {
+          navigate(ROUTES.QUIZ_PAGE, { state: { name: userName, roomId: quizCode, quizName: data.quizName } })
+        }
+        if (data.type === "error") {
+          setCodeError(data.message)
+          setShowCodeError(true)
+          setTimeout(() => {
+            setShowCodeError(false)
+          }, 5000)
+        }
+      })
     } else {
       if (quizCode.length !== 8) {
         setCodeError('Please enter a valid quiz code')

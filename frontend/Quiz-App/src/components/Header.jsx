@@ -5,8 +5,7 @@ export default function Header() {
   return (
     <header className="flex flex-row justify-between p-4 bg-[#fcf9f9f6] text-black">
       <h1 className="text-xl font-bold text-[#162fd5] ">
-        Quiz Application
-        <Link to={ROUTES.LANDING_PAGE}></Link>
+        <Link to={ROUTES.LANDING_PAGE}>Quiz Application</Link>
       </h1>
       <nav>
         <ul className="flex flex-row space-x-4">

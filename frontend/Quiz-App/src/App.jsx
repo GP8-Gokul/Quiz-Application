@@ -15,15 +15,17 @@ function App() {
   return (
     <BrowserRouter>
       <Header />
-      <Routes>
+      <SocketProvider>
+        <Routes>
         <Route path={ROUTES.LANDING_PAGE} element={<LandingPage />} />
         <Route path={ROUTES.AUTH_PAGE} element={<AuthPage />} />
-        <Route path={ROUTES.QUIZ_PAGE} element={<SocketProvider><QuizPage /></SocketProvider>} />
-        <Route path={ROUTES.ADMIN_PAGE} element={<SocketProvider><AdminPage /></SocketProvider>} />
+        <Route path={ROUTES.QUIZ_PAGE} element={<QuizPage />} />
+        <Route path={ROUTES.ADMIN_PAGE} element={<AdminPage />} />
         <Route path={ROUTES.CREATE_QUIZ_PAGE} element={<CreateQuizPage />} />
         <Route path={ROUTES.MY_QUIZZES_PAGE} element={<MyQuizzesPage />} />
         <Route path={ROUTES.QUIZ_DETAILS_PAGE} element={<QuizDetailsPage />} />
       </Routes>
+      </SocketProvider>
     </BrowserRouter>
   );
 }

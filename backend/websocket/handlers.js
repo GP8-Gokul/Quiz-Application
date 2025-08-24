@@ -1,7 +1,6 @@
-import { addGuestName } from "../db/queries.js";
 import { generateUniqueId } from "../utils/uniqueId.js";
 
-const rooms = new Map();
+export const rooms = new Map();
 
 const handleCreateRoom = (data, ws) => {
     const roomId = generateUniqueId()
@@ -12,26 +11,37 @@ const handleCreateRoom = (data, ws) => {
 }
 
 const handleJoinRoom = async (data, ws) => {
-    const { roomId,playerId,name } = data
+    const { roomId,name } = data
     const room = rooms.get(roomId)
+    const score = 0
     if (room) {
-            if (room.participants.some(participant => participant[2] === name)) {
+            if (room.participants.some(participant => participant[1] === name)) {
                 ws.send(JSON.stringify({ type: "error", message: "Name already taken" }))
                 return
             }
-            room.participants.push([ws, playerId, name, score=0])
+            room.participants.push([ws, name, score])
 
         ws.send(JSON.stringify({ type: "room-joined", quizName: room.quizName }))
         room.admin.send(JSON.stringify({ 
             type: "participant-joined", 
             participant: {
-                id: playerId,
                 name: name,
-                score: 0
-            } }))
+                score: score
+            }
+        }))
+        handleLeaderboardUpdate(room)
     } else {
         ws.send(JSON.stringify({ type: "error", message: "Room not found" }))
     }
+}
+
+const handleLeaderboardUpdate = (room) => {
+    const leaderboard = room.participants.map(participant => [participant[1], participant[2]])
+    leaderboard.sort((a, b) => b[1] - a[1])
+    room.admin.send(JSON.stringify({ type: "leaderboard-update", leaderboard }))
+    room.participants.forEach((participant) => {
+        participant[0].send(JSON.stringify({ type: "leaderboard-update", leaderboard }))
+    })
 }
 
 const handleStartQuiz = (data, ws) => {
