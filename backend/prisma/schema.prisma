@@ -17,12 +17,15 @@ model User{
 
   quizzes   Quiz[]
 
-  participations Participation[]
+  Participant Participant[]
 }
 
-model Guest{
+model Participant{
   id        String       @id @default(uuid())
-  name      String?
+  name      String
+
+  user     User?       @relation(fields: [userId], references: [id])
+  userId   String?
 
   createdAt DateTime     @default(now())
 
@@ -82,11 +85,8 @@ model Participation{
   quizSession QuizSession @relation(fields: [quizSessionId], references: [id])
   quizSessionId String
 
-  user     User?       @relation(fields: [userId], references: [id])
-  userId   String?
-
-  guest    Guest?       @relation(fields: [guestId], references: [id])
-  guestId  String?
+  participant    Participant?       @relation(fields: [participantId], references: [id])
+  participantId  String?
 
   createdAt DateTime     @default(now())
 
