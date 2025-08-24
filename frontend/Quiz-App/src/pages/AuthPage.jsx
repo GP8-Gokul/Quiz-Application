@@ -1,40 +1,40 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"
 import axios from 'axios'
-import { ROUTES } from "../routes/routes";
+import { ROUTES } from "../routes/routes"
 
 export default function AuthPage() {
   const [showSignUp, setSignUp] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const navigate = useNavigate()
 
   const handleSignUp = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     axios.post('http://localhost:3000/auth/signup', { name, email, password })
       .then(response => {
-        console.log(response.data);
-        navigate(ROUTES.CREATE_QUIZ_PAGE);
+        console.log(response.data)
+        setSignUp(false)
       })
       .catch(error => {
-        console.error(error);
-      });
-  };
+        console.error(error)
+      })
+  }
 
   const handleLogin = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     axios.post('http://localhost:3000/auth/signin', { email, password })
       .then(response => {
-        console.log(response.data);
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('name', response.data.name);
-        navigate(ROUTES.CREATE_QUIZ_PAGE);
+        console.log(response.data)
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('name', response.data.name)
+        navigate(ROUTES.CREATE_QUIZ_PAGE)
       })
       .catch(error => {
-        console.error(error);
-      });
-  };
+        console.error(error)
+      })
+  }
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-60px)]">

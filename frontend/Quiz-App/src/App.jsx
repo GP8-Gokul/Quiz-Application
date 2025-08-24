@@ -6,6 +6,7 @@ import Header from './components/Header';
 import QuizPage from './pages/QuizPage';
 import CreateQuizPage from './pages/CreateQuizPage';
 import { SocketProvider } from './contexts/SocketContex';
+import MyQuizzesPage from './pages/MyQuizzesPage';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
         <Route path={ROUTES.AUTH_PAGE} element={<AuthPage />} />
         <Route path={ROUTES.QUIZ_PAGE} element={<SocketProvider><QuizPage /></SocketProvider>} />
         <Route path={ROUTES.CREATE_QUIZ_PAGE} element={<CreateQuizPage />} />
+        <Route path={ROUTES.MY_QUIZZES_PAGE} element={<MyQuizzesPage />} />
       </Routes>
     </BrowserRouter>
   );
