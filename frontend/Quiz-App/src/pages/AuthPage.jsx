@@ -22,6 +22,20 @@ export default function AuthPage() {
       });
   };
 
+  const handleLogin = (e) => {
+    e.preventDefault();
+    axios.post('http://localhost:3000/auth/signin', { email, password })
+      .then(response => {
+        console.log(response.data);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('name', response.data.name);
+        navigate(ROUTES.CREATE_QUIZ_PAGE);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-60px)]">
       {showSignUp && (
@@ -57,7 +71,7 @@ export default function AuthPage() {
               <label className="block text-sm font-medium mb-2">Password</label>
               <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="w-full p-2 border rounded" />
             </div>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
+            <button type="submit" onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
           </form>
           <button onClick={() => setSignUp(true)} className="mt-4 text-blue-500 hover:underline">Create an account</button>
         </div>
