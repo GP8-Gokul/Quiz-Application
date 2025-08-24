@@ -3,6 +3,8 @@ export const ROUTES = {
     AUTH_PAGE : '/auth',
     QUIZ_PAGE : '/quiz',
     CREATE_QUIZ_PAGE : '/quiz/create',
-    MY_QUIZZES_PAGE : '/quiz/my-quizzes'
+    MY_QUIZZES_PAGE : '/quiz/my-quizzes',
+    QUIZ_DETAILS_PAGE : '/quiz/:slug',
+    ADMIN_PAGE : '/admin/:quiz'
 };
 
