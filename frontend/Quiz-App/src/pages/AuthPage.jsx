@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from 'axios'
-import { ROUTES } from "../routes/routes"
+import { ROUTES } from "../constants/Routes";
 
 export default function AuthPage() {
   const [showSignUp, setSignUp] = useState(false);

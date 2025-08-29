@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ROUTES } from "../routes/routes"
+import { ROUTES } from "../constants/Routes"
 
 export default function QuizDetailsPage() {
   const { slug } = useParams()
