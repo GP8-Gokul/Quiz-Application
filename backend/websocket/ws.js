@@ -16,12 +16,13 @@ const initWebSocket = (server) => {
                 return
             }
             switch(data.type){
-                case "create-room": handlers.handleCreateRoom(data, ws); break;
-                case "join-room": handlers.handleJoinRoom(data, ws); break;
-                case "start-quiz": handlers.handleStartQuiz(data, ws); break;
-                case "end-quiz": handlers.handleEndQuiz(data, ws); break;
-                case "next-question": handlers.handleNextQuestion(data, ws); break;
-                default: console.error("Unknown message type:", data.type);
+                case "create-room": handlers.handleCreateRoom(data, ws); break
+                case "join-room": handlers.handleJoinRoom(data, ws); break
+                case "end-quiz": handlers.handleEndQuiz(data, ws); break
+                case "next-question": handlers.handleNextQuestion(data, ws); break
+                case "end-question": handlers.handleEndQuestion(data, ws); break
+                case "submit-answer": handlers.handleSubmitAnswer(data, ws); break
+                default: console.error("Unknown message type:", data.type)
             }
         })
 

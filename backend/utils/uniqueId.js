@@ -1,5 +1,5 @@
 import { customAlphabet } from "nanoid"
-import {rooms} from "../websocket/handlers.js"
+import {rooms} from "../websocket/room.js"
 
 const nanoidNumbers = customAlphabet("0123456789", 8)
 export const generateUniqueId = () => {
