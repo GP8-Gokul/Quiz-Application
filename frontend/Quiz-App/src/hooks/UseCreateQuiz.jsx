@@ -3,7 +3,7 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { ROUTES } from "../constants/Routes"
 
-export default function useQuiz() {
+export default function useCreateQuiz() {
     const [questions, setQuestions] = useState([])
     const [currentQuestion, setCurrentQuestion] = useState({ text: '', options: [{ text: '', isCorrect: false }] })
     const [quizTitle, setQuizTitle] = useState('')

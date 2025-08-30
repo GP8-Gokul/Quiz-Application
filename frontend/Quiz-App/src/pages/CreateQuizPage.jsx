@@ -1,6 +1,6 @@
 import QuestionList from "../components/QuestionList"
 import QuizForm from "../components/QuizForm"
-import useQuiz from "../hooks/UseQuiz"
+import useCreateQuiz from "../hooks/UseCreateQuiz"
 
 export default function CreateQuizPage() {
   const {
@@ -19,7 +19,7 @@ export default function CreateQuizPage() {
     handleOptionTextChange,
     handleOptionCorrectChange,
     handleSubmitQuiz
-  } = useQuiz()
+  } = useCreateQuiz()
 
   return (
     <div className="flex w-full min-h-screen bg-gray-50">

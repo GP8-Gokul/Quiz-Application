@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { ROUTES } from "../constants/Routes"
+import { ROUTES } from "../constants/routes"
 import { useNavigate } from "react-router-dom"
 
 export default function MyQuizzesPage() {
