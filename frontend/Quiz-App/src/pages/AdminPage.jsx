@@ -3,11 +3,13 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useSocket } from "../contexts/SocketContex"
 import LeaderboardCard from "../components/LeaderboardCard"
+import { BASE_HTTP_URL } from "../constants/Urls"
+import LoadingBar from "../components/LoadingBar"
 
 export default function AdminPage() {
   const { slug } = useParams()
   const [quiz, setQuiz] = useState(null)
-  const [roomId, setRoomId] = useState(localStorage.getItem(`roomId-${slug}`) || null)
+  const [roomId, setRoomId] = useState(null)
   const [copied, setCopied] = useState(false)
   const [shareError, setShareError] = useState("")
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0)
@@ -19,6 +21,7 @@ export default function AdminPage() {
   const [sentQuestions, setSentQuestions] = useState([])
   const [quizEnded, setQuizEnded] = useState(false)
   const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState(0)
+  const [time, setTime] = useState(60)
   const socket = useSocket()
 
   useEffect(() => {
@@ -39,7 +42,7 @@ export default function AdminPage() {
   }, [timer, isTimerRunning])
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/quiz/${slug}`,{
+    axios.get(`${BASE_HTTP_URL}/quiz/${slug}`,{
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
       }
@@ -77,7 +80,6 @@ export default function AdminPage() {
       switch (data.type) {
         case "room-created":
           setRoomId(data.roomId)
-          localStorage.setItem(`roomId-${slug}`, data.roomId)
           break;
         case "participant-joined":
           setNoOfParticipants((prev) => prev + 1)
@@ -125,14 +127,6 @@ export default function AdminPage() {
   }, [socket, quiz, roomId])
 
   const handleCopy = async () => {
-    if (!roomId) return
-
-    if (!navigator.clipboard) {
-      setCopied(false)
-      console.warn("Clipboard API not supported")
-      return
-    }
-
     try {
       await navigator.clipboard.writeText(roomId)
       setCopied(true)
@@ -144,21 +138,14 @@ export default function AdminPage() {
   }
 
   const handleShare = async () => {
-    setShareError("")
-
-    if (!navigator.share) {
-      setShareError("Sharing not supported on this device.")
-      return
-    }
-
     try {
+      const shareUrl = `https://pf8cj6pg-5173.inc1.devtunnels.ms/${roomId}`
       await navigator.share({
-        title: "Quiz Room\n",
-        text: `Join my quiz room! Room ID: ${roomId}`,
+        title: "Quiz Room",
+        text: `Join my quiz room!\nRoom ID: ${roomId}\n${shareUrl}`
       })
     } catch (err) {
       console.error("Share failed:", err)
-      setShareError("Share cancelled or failed.")
     }
   }
 
@@ -169,6 +156,10 @@ export default function AdminPage() {
     if (!sentQuestions.includes(currentQuestionIdx)) {
       setSentQuestions(prev => [...prev, currentQuestionIdx])
     }
+    else{
+      alert("Question already sent.")
+      return
+    }
     socket.send(JSON.stringify({
       type: "next-question",
       questionId: currentQuestionIdx,
@@ -178,6 +169,7 @@ export default function AdminPage() {
 
   const handleEndQuestion = () => {
     setIsTimerRunning(false)
+    setTimer(0)
     socket.send(JSON.stringify({
       type: "end-question",
       roomId
@@ -195,9 +187,7 @@ export default function AdminPage() {
   }
 
   const handleNextQuestion = () => {
-    if (quiz) {
-      setCurrentQuestionIdx(idx => Math.min(idx + 1, quiz.questions.length - 1))
-    }
+    setCurrentQuestionIdx(idx => Math.min(idx + 1, quiz.questions.length - 1))
   }
 
   const handlePrevQuestion = () => {
@@ -205,7 +195,7 @@ export default function AdminPage() {
   }
 
   if (!quiz) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading quiz...</div>
+    return <LoadingBar />
   }
 
   if (quizEnded) {
@@ -245,7 +235,9 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 p-4">
+
       <div className="max-w-4xl mx-auto space-y-4">
+
         <div className="bg-white p-4 rounded">
           <h1 className="text-xl font-bold">{quiz.title}</h1>
           <p>Participants: {noOfParticipants}</p>
@@ -268,7 +260,7 @@ export default function AdminPage() {
           <div className="bg-white p-4 rounded">
             {autoAdvanceCountdown > 0 && (
               <div className="mb-3 p-2 bg-blue-100 rounded">
-                <p className="text-center">Auto-advancing in {autoAdvanceCountdown} seconds...</p>
+                <p className="text-center">Going to next question in {autoAdvanceCountdown} seconds...</p>
               </div>
             )}
             
@@ -307,21 +299,25 @@ export default function AdminPage() {
                 Answered: {peopleAnswered}/{noOfParticipants}
               </div>
             </div>
-            
+            <label>Time: </label>
+            <input
+              type="text"
+              className="w-full/2 max-w-xs mb-2 border border-gray-300 rounded-lg px-4 py-2 text-gray-700"
+              value={time}
+              onChange={e => {
+                if (!isNaN(Number(e.target.value))) {
+                  setTime(Number(e.target.value))
+                }
+              }}
+            />
+
             <div className="flex flex-wrap gap-2">
               <button 
-                onClick={() => handleSendQuestion(60)} 
+                onClick={() => handleSendQuestion(time)} 
                 disabled={isTimerRunning || autoAdvanceCountdown > 0} 
                 className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
               >
-                {isTimerRunning ? 'Active' : 'Send (60s)'}
-              </button>
-              <button 
-                onClick={() => handleSendQuestion(30)} 
-                disabled={isTimerRunning || autoAdvanceCountdown > 0} 
-                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-              >
-                Send (30s)
+                {isTimerRunning ? 'Active' : `Send (${time}s)`}
               </button>
               {isTimerRunning && (
                 <button onClick={handleEndQuestion} className="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700">

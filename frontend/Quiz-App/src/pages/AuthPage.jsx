@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from 'axios'
 import { ROUTES } from "../constants/Routes";
+import { BASE_HTTP_URL } from "../constants/Urls";
 
 export default function AuthPage() {
   const [showSignUp, setSignUp] = useState(false);
@@ -12,7 +13,7 @@ export default function AuthPage() {
 
   const handleSignUp = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3000/auth/signup', { name, email, password })
+    axios.post(`${BASE_HTTP_URL}/auth/signup`, { name, email, password })
       .then(response => {
         console.log(response.data)
         setSignUp(false)
@@ -24,7 +25,7 @@ export default function AuthPage() {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    axios.post('http://localhost:3000/auth/signin', { email, password })
+    axios.post(`${BASE_HTTP_URL}/auth/signin`, { email, password })
       .then(response => {
         console.log(response.data)
         localStorage.setItem('token', response.data.token)

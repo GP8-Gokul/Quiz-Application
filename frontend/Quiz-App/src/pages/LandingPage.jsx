@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../constants/Routes";
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../contexts/SocketContex";
@@ -7,55 +7,23 @@ export default function LandingPage() {
 
   const navigate = useNavigate()
 
-  const [code,setCode] = useState(['','','','','','','',''])
-  const codeRefs = useRef([])
+  const codeRef = useRef(null)
   const nameRef = useRef(null)
 
   const [showCodeError, setShowCodeError] = useState(false)
   const [codeError,setCodeError] = useState('')
 
   const socket = useSocket()
+  const paramCode = useParams().code
 
   useEffect(() => {
-    codeRefs.current[0].focus()
+    if(paramCode) {
+      codeRef.current.value = paramCode
+    }
   }, [])
 
-  const handleCodeChange = (e, idx) => {
-    if(isNaN(e.target.value) || e.target.value.length > 1) {
-      setCodeError('Please enter a valid digit')
-      setShowCodeError(true)
-      setTimeout(() => {
-        setShowCodeError(false)
-      }, 5000)
-      e.target.value = ''
-      return;
-    }
-    else{
-      setShowCodeError(false)
-    }
-    const newCode = [...code]
-    newCode[idx] = e.target.value
-    setCode(newCode)
-    if (e.target.value){
-      if (idx < code.length - 1) {
-        codeRefs.current[idx+1].focus()
-      }
-      else{
-        codeRefs.current[code.length - 1].blur()
-        nameRef.current.focus()
-      }
-    }
-  }
-
-  const handleKeyDown = (e, idx) => {
-    if (e.key === "Backspace" && !code[idx]) {
-      codeRefs.current[idx - 1].focus()
-    }
-  }
-
   const handleJoinQuiz = () => {
-    const quizCode = code.join("")
-    console.log(quizCode)
+    const quizCode = codeRef.current.value
     const userName = nameRef.current.value
 
     if (quizCode.length === 8 && userName) {
@@ -106,25 +74,20 @@ export default function LandingPage() {
         <h1 className="text-2xl font-bold text-[#010101] mb-4">
           Enter code to join the quiz
         </h1>
-        <div className="flex flex-wrap gap-1 mb-4">
-          {code.map((digit, idx) => (
-            <span key={idx}>
-              <input
-                ref={e => codeRefs.current[idx] = e}
-                type="text"
-                inputMode="numeric"
-                value={digit}
-                onKeyDown={e => handleKeyDown(e, idx)}
-                onChange={(e) => handleCodeChange(e, idx)}
-                className="p-2 border border-gray-300 rounded w-7 h-8  md:w-12 md:h-10 text-center hover:border-blue-500"
-              />
-              {idx == 3 ? <span className="mx-2"> -</span> : null}
-            </span>
-          ))}
-        </div>
         <input 
           type="text"
-          ref = {nameRef} 
+          ref={codeRef}
+          placeholder="xxxxxxxx"
+          className="p-2 border border-gray-300 rounded w-[60vw] md:w-[20vw]"
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              nameRef.current.focus();
+            }
+          }}
+        />
+        <input 
+          type="text"
+          ref={nameRef} 
           placeholder="Enter your name" 
           onKeyDown={e => {
             if (e.key === "Enter") {
@@ -142,7 +105,7 @@ export default function LandingPage() {
 
         <p className="text-black mt-6">
           Want to create a room? 
-          <Link to={ROUTES.AUTH_PAGE}
+          <Link to={ROUTES.CREATE_QUIZ_PAGE}
             className="text-blue-500 hover:underline"
           >
             Create

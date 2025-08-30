@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom"
 import { useSocket } from "../contexts/SocketContex"
 import { useEffect, useState } from "react"
 import LeaderboardCard from "../components/LeaderboardCard"
+import LoadingBar from "../components/LoadingBar"
 
 export default function QuizPage() {
   const location = useLocation()
@@ -14,7 +15,8 @@ export default function QuizPage() {
   const [timeLeft, setTimeLeft] = useState(0)
   const [leaderboard, setLeaderboard] = useState([])
   const [hasSubmitted, setHasSubmitted] = useState(false)
-  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [timeTaken, setTimeTaken] = useState(0)
+  const [questionStartTime, setQuestionStartTime] = useState(null)
 
   useEffect(() => {
     if (timeLeft > 0 && quizState === 'question-active' && !hasSubmitted) {
@@ -43,12 +45,12 @@ export default function QuizPage() {
               setQuizState('question-active')
               setSelectedOption(null)
               setHasSubmitted(false)
-              setShowLeaderboard(false)
+              setQuestionStartTime(Date.now())
+              setTimeTaken(0)
               break
             
             case "question-ended":
               setQuizState('waiting-for-next')
-              setShowLeaderboard(true)
               break
             
             case "leaderboard-update":
@@ -57,7 +59,6 @@ export default function QuizPage() {
             
             case "quiz-ended":
               setQuizState('quiz-ended')
-              setShowLeaderboard(true)
               break
             
             case "room-closed":
@@ -81,6 +82,12 @@ export default function QuizPage() {
 
   const handleSubmitAnswer = () => {
     if (hasSubmitted) return
+    
+    // Calculate time taken
+    if (questionStartTime) {
+      const timeElapsed = Math.round((Date.now() - questionStartTime) / 1000)
+      setTimeTaken(timeElapsed)
+    }
     
     setHasSubmitted(true)
     if (socket && currentQuestion) {
@@ -158,7 +165,7 @@ export default function QuizPage() {
 
           {hasSubmitted && (
             <div className="mt-4 text-center text-gray-600">
-              Waiting for other players to submit their answers...
+              {`You answered the question in ${timeTaken} seconds`}
             </div>
           )}
         </div>
@@ -167,42 +174,7 @@ export default function QuizPage() {
   )
 
   const renderWaitingForNext = () => (
-    <div className="min-h-screen bg-gray-50 py-8 px-2">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="bg-white rounded shadow p-6 text-center">
-          <h2 className="text-xl font-semibold mb-4">Waiting for Next Question</h2>
-          <p className="text-gray-600">Get ready for the next question...</p>
-          <div className="mt-4">
-            <div className="animate-pulse">
-              <div className="w-4 h-4 bg-blue-400 rounded-full mx-auto"></div>
-            </div>
-          </div>
-        </div>
-
-        {showLeaderboard && (
-          <div className="bg-white rounded shadow p-6">
-            <h3 className="text-lg font-semibold mb-4">Current Leaderboard</h3>
-            {leaderboard.length === 0 ? (
-              <p className="text-gray-500">No data yet.</p>
-            ) : (
-              <ul className="space-y-2">
-                {leaderboard.map((entry, idx) => (
-                  <li key={idx} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                    <span className="flex items-center gap-2">
-                      <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">
-                        {idx + 1}
-                      </span>
-                      {entry.name}
-                    </span>
-                    <span className="font-semibold">{entry.score} pts</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+    <LoadingBar text="keep Going" />
   )
 
   const renderQuizEnded = () => (

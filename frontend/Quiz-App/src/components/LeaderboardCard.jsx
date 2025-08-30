@@ -6,27 +6,52 @@ export default function LeaderboardCard({ leaderboard }) {
 
   // Increment scores one by one
   useEffect(() => {
-    leaderboard.forEach(entry => {
+    const intervals = []; // Track intervals for cleanup
+
+    leaderboard.forEach((entry) => {
+      // Ensure entry.name exists and entry.score is a valid number
+      if (!entry.name || typeof entry.score !== "number" || isNaN(entry.score)) {
+        return;
+      }
+
       const current = animatedScores[entry.name] ?? 0;
-      if (current < entry.score) {
+      const targetScore = entry.score;
+
+      if (current < targetScore) {
+        const difference = targetScore - current;
+        const increment = Math.max(1, Math.ceil(difference / 20)); // Animate over ~20 steps
+        
         const interval = setInterval(() => {
-          setAnimatedScores(prev => {
-            const next = prev[entry.name] + 1;
-            if (next >= entry.score) {
+          setAnimatedScores((prev) => {
+            const currentValue = prev[entry.name] ?? 0;
+            const next = currentValue + increment;
+
+            if (next >= targetScore) {
               clearInterval(interval);
-              return { ...prev, [entry.name]: entry.score };
+              return { ...prev, [entry.name]: targetScore };
             }
             return { ...prev, [entry.name]: next };
           });
-        }, 50); // increment speed (ms)
-      } else if (current > entry.score) {
-        // Optional: decrement if needed
-        setAnimatedScores(prev => ({ ...prev, [entry.name]: entry.score }));
+        }, 30);
+
+        intervals.push(interval);
+      } else if (current > targetScore) {
+        // Direct update if score decreased
+        setAnimatedScores((prev) => ({ ...prev, [entry.name]: targetScore }));
       }
     });
-  }, [leaderboard]);
 
-  const maxScore = Math.max(...leaderboard.map(p => p.score), 1);
+    // Cleanup all intervals
+    return () => {
+      intervals.forEach((interval) => clearInterval(interval));
+    };
+  }, [leaderboard, animatedScores]);
+
+  // Fix: Ensure scores are numbers and fallback to 0 if missing
+  const safeScores = leaderboard
+    .filter((p) => p.name && typeof p.score === "number" && !isNaN(p.score))
+    .map((p) => p.score);
+  const maxScore = Math.max(...safeScores, 1);
 
   return (
     <div className="bg-white p-4 rounded shadow">
@@ -36,6 +61,10 @@ export default function LeaderboardCard({ leaderboard }) {
       ) : (
         <motion.div layout>
           {leaderboard
+            .filter(
+              (entry) =>
+                entry.name && typeof entry.score === "number" && !isNaN(entry.score)
+            )
             .sort((a, b) => b.score - a.score)
             .map((entry, idx) => (
               <motion.div
@@ -44,7 +73,7 @@ export default function LeaderboardCard({ leaderboard }) {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.001 }}
                 className="mb-2"
               >
                 <div className="flex justify-between items-center mb-1">
@@ -60,17 +89,20 @@ export default function LeaderboardCard({ leaderboard }) {
                 </div>
 
                 {/* Progress Bar */}
-                <motion.div
-                  className="h-3 bg-blue-500 rounded"
-                  initial={{ width: 0 }}
-                  animate={{
-                    width: `${
-                      ((animatedScores[entry.name] ?? entry.score) / maxScore) *
-                      100
-                    }%`,
-                  }}
-                  transition={{ duration: 0.5 }}
-                />
+                <div className="w-full bg-gray-200 rounded h-3">
+                  <motion.div
+                    className="h-3 bg-blue-500 rounded"
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${
+                        maxScore > 0
+                          ? ((animatedScores[entry.name] ?? entry.score) / maxScore) * 100
+                          : 0
+                      }%`,
+                    }}
+                    transition={{ duration: 0.001 }}
+                  />
+                </div>
               </motion.div>
             ))}
         </motion.div>

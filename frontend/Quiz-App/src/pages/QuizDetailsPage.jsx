@@ -2,6 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ROUTES } from "../constants/Routes"
+import { BASE_HTTP_URL } from "../constants/Urls"
 
 export default function QuizDetailsPage() {
   const { slug } = useParams()
@@ -10,7 +11,7 @@ export default function QuizDetailsPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/quiz/${slug}`,{
+    axios.get(`${BASE_HTTP_URL}/quiz/${slug}`,{
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
       }

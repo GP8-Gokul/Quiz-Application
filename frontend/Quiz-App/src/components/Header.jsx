@@ -9,9 +9,7 @@ export default function Header() {
       </h1>
       <nav>
         <ul className="flex flex-row space-x-4">
-          <li><Link to={ROUTES.LANDING_PAGE}>Home</Link></li>
-          <li><Link to={ROUTES.MY_QUIZZES_PAGE}>Quizess</Link></li>
-          <li><Link to={ROUTES.RESULT}>Result</Link></li>
+          <li><Link to={ROUTES.MY_QUIZZES_PAGE}>Quizzes</Link></li>
         </ul>
       </nav>
     </header>

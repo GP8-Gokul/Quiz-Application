@@ -18,6 +18,7 @@ function App() {
       <SocketProvider>
         <Routes>
         <Route path={ROUTES.LANDING_PAGE} element={<LandingPage />} />
+        <Route path={ROUTES.LANDING_PAGE_WITH_CODE} element={<LandingPage />} />
         <Route path={ROUTES.AUTH_PAGE} element={<AuthPage />} />
         <Route path={ROUTES.QUIZ_PAGE} element={<QuizPage />} />
         <Route path={ROUTES.ADMIN_PAGE} element={<AdminPage />} />

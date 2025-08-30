@@ -1,7 +1,8 @@
 import { useState } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
-import { ROUTES } from "../constants/routes"
+import { ROUTES } from "../constants/Routes"
+import { BASE_HTTP_URL } from "../constants/Urls"
 
 export default function useCreateQuiz() {
     const [questions, setQuestions] = useState([])
@@ -25,7 +26,7 @@ export default function useCreateQuiz() {
         }
         try {
             const response = await axios.post(
-                "http://localhost:3000/quiz/create",
+                `${BASE_HTTP_URL}/quiz/create`,
                 { title: quizTitle, questions },
                 {
                     headers: {

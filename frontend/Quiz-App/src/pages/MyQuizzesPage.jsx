@@ -1,7 +1,8 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { ROUTES } from "../constants/routes"
 import { useNavigate } from "react-router-dom"
+import { ROUTES } from "../constants/Routes"
+import { BASE_HTTP_URL } from "../constants/Urls"
 
 export default function MyQuizzesPage() {
   const [quiz, setQuiz] = useState()
@@ -13,7 +14,7 @@ export default function MyQuizzesPage() {
     if (!token) {
       navigate(ROUTES.AUTH_PAGE)
     }
-    axios.get("http://localhost:3000/quiz/my-quizzes", {
+    axios.get(`${BASE_HTTP_URL}/quiz/my-quizzes`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
