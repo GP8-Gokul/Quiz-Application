@@ -1,7 +1,7 @@
 import { useState } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
-import { ROUTES } from "../constants/Routes"
+import { ROUTES } from "../constants/routes"
 
 export default function useCreateQuiz() {
     const [questions, setQuestions] = useState([])
