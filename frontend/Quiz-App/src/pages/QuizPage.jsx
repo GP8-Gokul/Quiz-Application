@@ -192,9 +192,9 @@ export default function QuizPage() {
                       <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">
                         {idx + 1}
                       </span>
-                      {entry[0]}
+                      {entry.name}
                     </span>
-                    <span className="font-semibold">{entry[1]} pts</span>
+                    <span className="font-semibold">{entry.score} pts</span>
                   </li>
                 ))}
               </ul>
