@@ -39,10 +39,9 @@ export default function LeaderboardCard({ leaderboard, quiz, name="" }){
 
     const [isWinner, setIsWinner] = useState(false)
 
-    const STEP = 7
     const INTERVAL = 50  
     const maxScore = leaderboard[0].score ?? 1
-
+    const STEP = Math.max(7,Math.floor((maxScore / 100) * 7))
     const [confettiActive, setConfettiActive] = useState(false)
 
     useEffect(() => {
