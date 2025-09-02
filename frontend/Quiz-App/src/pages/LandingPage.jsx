@@ -26,7 +26,7 @@ export default function LandingPage() {
     const quizCode = codeRef.current.value
     const userName = nameRef.current.value
 
-    if (quizCode.length === 8 && userName) {
+    if (quizCode.length === 8 && userName.length <= 10) {
       socket.send(JSON.stringify({
         type: "join-room",
         roomId: quizCode,
@@ -52,6 +52,9 @@ export default function LandingPage() {
       }
       if (!userName) {
         setCodeError('Please enter your name')
+      }
+      if (userName.length > 10){
+        setCodeError("Name should be less than 10 characters")
       }
       setShowCodeError(true)
       setTimeout(() => {

@@ -5,6 +5,7 @@ import { useSocket } from "../contexts/SocketContex"
 import LeaderboardCard from "../components/LeaderboardCard"
 import { BASE_HTTP_URL } from "../constants/Urls"
 import LoadingBar from "../components/LoadingBar"
+import FinalscoreCard from "../components/FinalscoreCard"
 
 export default function AdminPage() {
   const { slug } = useParams()
@@ -94,7 +95,7 @@ export default function AdminPage() {
         case "question-ended":
           setPeopleAnswered(0)
           setIsTimerRunning(false)
-          setAutoAdvanceCountdown(3)
+          setAutoAdvanceCountdown(40)
           setTimeout(() => {
             setCurrentQuestionIdx(prev => {
               const nextIdx = prev + 1
@@ -198,38 +199,7 @@ export default function AdminPage() {
     return <LoadingBar />
   }
 
-  if (quizEnded) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-6 rounded">
-            <h1 className="text-2xl font-bold text-green-600 mb-4">Quiz Completed!</h1>
-            <p className="mb-4">Thank you for hosting "{quiz.title}"</p>
-            <div className="bg-green-100 p-3 rounded mb-4">
-              <p>All participants have been notified that the quiz has ended.</p>
-            </div>
-
-            <LeaderboardCard leaderboard={leaderboard} />
-
-            <div className="flex gap-3">
-              <button 
-                onClick={() => window.location.href = '/my-quizzes'} 
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Back to My Quizzes
-              </button>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-              >
-                Host Again
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (quizEnded) return <FinalscoreCard leaderboard={leaderboard} quiz={quiz.title} />
 
   const currentQuestion = quiz.questions[currentQuestionIdx]
 

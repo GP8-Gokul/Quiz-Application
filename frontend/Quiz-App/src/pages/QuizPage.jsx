@@ -1,8 +1,8 @@
 import { useLocation } from "react-router-dom"
 import { useSocket } from "../contexts/SocketContex"
 import { useEffect, useState } from "react"
-import LeaderboardCard from "../components/LeaderboardCard"
 import LoadingBar from "../components/LoadingBar"
+import FinalscoreCard from "../components/FinalscoreCard"
 
 export default function QuizPage() {
   const location = useLocation()
@@ -178,16 +178,7 @@ export default function QuizPage() {
   )
 
   const renderQuizEnded = () => (
-    <div className="min-h-screen bg-gray-50 py-8 px-2">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded shadow p-8 text-center">
-          <h1 className="text-2xl font-semibold mb-4">Quiz Completed!</h1>
-          <p className="text-gray-700 mb-6">Thank you for participating, {name}!</p>
-
-          <LeaderboardCard leaderboard={leaderboard} />
-        </div>
-      </div>
-    </div>
+          <FinalscoreCard leaderboard={leaderboard} quiz={quizName} name={name} />
   )
 
   switch (quizState) {
