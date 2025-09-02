@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import LoadingBar from "../components/LoadingBar"
 import FinalscoreCard from "../components/FinalscoreCard"
 import { ROUTES } from "../constants/routes"
-import { set } from "lodash"
 
 export default function QuizPage() {
   const location = useLocation()
@@ -38,7 +37,7 @@ export default function QuizPage() {
   }
 
   const handleSubmitAnswer = () => {
-    if (hasSubmitted) return
+    if (hasSubmitted || !currentQuestion) return
     
     if (questionStartTime) {
       const timeElapsed = Math.round((Date.now() - questionStartTime) / 1000)
@@ -56,17 +55,20 @@ export default function QuizPage() {
   }
 
   useEffect(() => {
+    let timer
     if (timeLeft > 0 && !hasSubmitted) {
-      setTimeLeft(timeLeft - 1)
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
     } else if (timeLeft === 0 && !hasSubmitted) {
       handleSubmitAnswer()
     }
-  }, [timeLeft])
+    return () => clearTimeout(timer)
+  }, [timeLeft, hasSubmitted])
 
   useEffect(() => {
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data)
+        console.log("QuizPage received message:", data.type, data)
 
         switch (data.type) {
           case "question-received": handleQuestionReceived(data); break;

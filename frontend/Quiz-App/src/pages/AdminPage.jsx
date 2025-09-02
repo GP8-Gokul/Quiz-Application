@@ -12,7 +12,6 @@ export default function AdminPage() {
   const [quiz, setQuiz] = useState(null)
   const [roomId, setRoomId] = useState(null)
   const [copied, setCopied] = useState(false)
-  const [shareError, setShareError] = useState("")
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0)
   const [peopleAnswered, setPeopleAnswered] = useState(0)
   const [timer, setTimer] = useState(60)
@@ -21,111 +20,29 @@ export default function AdminPage() {
   const [noOfParticipants, setNoOfParticipants] = useState(0)
   const [sentQuestions, setSentQuestions] = useState([])
   const [quizEnded, setQuizEnded] = useState(false)
-  const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState(0)
-  const [time, setTime] = useState(60)
+  const [time, setTime] = useState(30)
   const socket = useSocket()
 
-  useEffect(() => {
-    if (autoAdvanceCountdown > 0) {
-      const countdown = setTimeout(() => setAutoAdvanceCountdown(autoAdvanceCountdown - 1), 1000)
-      return () => clearTimeout(countdown)
-    }
-  }, [autoAdvanceCountdown])
-
-  useEffect(() => {
-    if (isTimerRunning && timer > 0) {
-      const countdown = setTimeout(() => setTimer(timer - 1), 1000)
-      return () => clearTimeout(countdown)
-    } else if (timer === 0 && isTimerRunning) {
-      setIsTimerRunning(false)
-      handleEndQuestion()
-    }
-  }, [timer, isTimerRunning])
-
-  useEffect(() => {
-    axios.get(`${BASE_HTTP_URL}/quiz/${slug}`,{
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    })
-      .then(response => {
-        setQuiz(response.data)
+  const handleQuestionEnded = () => {
+    setPeopleAnswered(0)
+    setIsTimerRunning(false)
+    setCurrentQuestionIdx(prev => {
+        let nextIdx = prev + 1
+        if (nextIdx == quiz.questions.length) {
+          if (quiz.questions.length === sentQuestions.length) {
+            handleEndQuiz()
+            return prev
+          }
+          nextIdx = quiz.questions.findIndex((q, idx) => !sentQuestions.includes(idx))
+        }
+        return nextIdx
       })
-      .catch(error => {
-        console.error("Error fetching quiz details:", error)
-      })
-  }, [])
+  }
 
-
-  // Combine all WebSocket message handling into a single useEffect
-  useEffect(() => {
-    if (!socket) return;
-
-    // If quiz is loaded and no roomId, create the room
-    if (quiz && !roomId) {
-      socket.send(JSON.stringify({
-        type: "create-room",
-        title: quiz.title,
-        questions: quiz.questions
-      }))
-    }
-
-    const handleMessage = (event) => {
-      let data;
-      try {
-        data = JSON.parse(event.data)
-      } catch (e) {
-        console.error(e)
-        return
-      }
-      switch (data.type) {
-        case "room-created":
-          setRoomId(data.roomId)
-          break;
-        case "participant-joined":
-          setNoOfParticipants((prev) => prev + 1)
-          break;
-        case "participant-left":
-          setNoOfParticipants((prev) => prev - 1)
-          break;
-        case "leaderboard-update":
-          setLeaderboard(data.leaderboard)
-          console.log("Leaderboard updated:", data.leaderboard)
-          break;
-        case "question-ended":
-          setPeopleAnswered(0)
-          setIsTimerRunning(false)
-          setAutoAdvanceCountdown(40)
-          setTimeout(() => {
-            setCurrentQuestionIdx(prev => {
-              const nextIdx = prev + 1
-              if (quiz && nextIdx >= quiz.questions.length) {
-                handleEndQuiz()
-                return prev
-              }
-              setAutoAdvanceCountdown(0)
-              return nextIdx
-            })
-          }, 3000)
-          break;
-        case "quiz-ended":
-          setQuizEnded(true)
-          setIsTimerRunning(false)
-          setAutoAdvanceCountdown(0)
-          break;
-        case "participant-answered":
-          setPeopleAnswered(data.answeredCount)
-          break;
-        default:
-          break;
-      }
-    }
-
-    socket.addEventListener("message", handleMessage)
-    return () => {
-      socket.removeEventListener("message", handleMessage)
-    }
-  }, [socket, quiz, roomId])
+  const handleQuizEnded = () => {
+    setQuizEnded(true)
+    setIsTimerRunning(false)
+  }
 
   const handleCopy = async () => {
     try {
@@ -149,6 +66,74 @@ export default function AdminPage() {
       console.error("Share failed:", err)
     }
   }
+
+  const handleNextQuestion = () => {
+    setCurrentQuestionIdx(idx => Math.min(idx + 1, quiz.questions.length - 1))
+  }
+
+  const handlePrevQuestion = () => {
+    setCurrentQuestionIdx(idx => Math.max(idx - 1, 0))
+  }
+
+  useEffect(() => {
+    axios.get(`${BASE_HTTP_URL}/quiz/${slug}`,{
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+      .then(response => {
+        setQuiz(response.data)
+      })
+      .catch(error => {
+        console.error("Error fetching quiz details:", error)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (!socket) return
+
+    if (quiz && !roomId) {
+      socket.send(JSON.stringify({
+        type: "create-room",
+        title: quiz.title,
+        questions: quiz.questions
+      }))
+    }
+
+    const handleMessage = (event) => {
+      let data
+      try {
+        data = JSON.parse(event.data)
+      } catch (e) {
+        console.error(e)
+        return
+      }
+
+      switch (data.type) {
+        case "room-created": setRoomId(data.roomId); break;
+        case "participant-joined": setNoOfParticipants((prev) => prev + 1); break;
+        case "participant-left": setNoOfParticipants((prev) => prev - 1); break;
+        case "leaderboard-update": setLeaderboard(data.leaderboard); break;
+        case "question-ended": handleQuestionEnded(); break;
+        case "quiz-ended": handleQuizEnded(); break;
+        case "participant-answered": setPeopleAnswered(data.answeredCount); break;
+        default: break;
+      }
+    }
+
+    socket.addEventListener("message", handleMessage)
+    return () => { socket.removeEventListener("message", handleMessage)}
+  }, [socket,quiz])
+
+  useEffect(() => {
+    if (isTimerRunning && timer > 0) {
+      const countdown = setTimeout(() => setTimer(prev => prev - 1), 1000)
+      return () => clearTimeout(countdown)
+    } else if (timer === 0 && isTimerRunning) {
+      setIsTimerRunning(false)
+      handleEndQuestion()
+    }
+  }, [timer, isTimerRunning])
 
   const handleSendQuestion = (time) => {
     setTimer(time)
@@ -180,24 +165,13 @@ export default function AdminPage() {
   const handleEndQuiz = () => {
     setQuizEnded(true)
     setIsTimerRunning(false)
-    setAutoAdvanceCountdown(0)
     socket.send(JSON.stringify({
       type: "end-quiz",
       roomId
     }))
   }
 
-  const handleNextQuestion = () => {
-    setCurrentQuestionIdx(idx => Math.min(idx + 1, quiz.questions.length - 1))
-  }
-
-  const handlePrevQuestion = () => {
-    setCurrentQuestionIdx(idx => Math.max(idx - 1, 0))
-  }
-
-  if (!quiz) {
-    return <LoadingBar />
-  }
+  if (!quiz) return <LoadingBar />
 
   if (quizEnded) return <FinalscoreCard leaderboard={leaderboard} quiz={quiz.title} />
 
@@ -205,9 +179,9 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 p-4">
-
       <div className="max-w-4xl mx-auto space-y-4">
 
+        {/* Room id block */}
         <div className="bg-white p-4 rounded">
           <h1 className="text-xl font-bold">{quiz.title}</h1>
           <p>Participants: {noOfParticipants}</p>
@@ -221,38 +195,35 @@ export default function AdminPage() {
                 <button onClick={handleShare} className="px-2 py-1 bg-blue-500 text-white rounded text-sm">
                   Share
                 </button>
-                {shareError && <div className="text-red-500 text-sm">{shareError}</div>}
               </div>
-            </div>}
+            </div>
+          }
         </div>
         
         <div className="grid md:grid-cols-2 gap-4">
+
+          {/* Main Dashboard */}
           <div className="bg-white p-4 rounded">
-            {autoAdvanceCountdown > 0 && (
-              <div className="mb-3 p-2 bg-blue-100 rounded">
-                <p className="text-center">Going to next question in {autoAdvanceCountdown} seconds...</p>
-              </div>
-            )}
             
-            <div className="mb-3">
-              <div className="flex justify-between items-center mb-2">
-                <div className="font-bold">
-                  Question {currentQuestionIdx + 1}/{quiz.questions.length}
-                  <div className="flex gap-1 mt-1">
-                    {quiz.questions.map((q, idx) => (
-                      <div key={q.id} className={
-                        "w-2 h-2 rounded " +
-                        (sentQuestions.includes(idx) ? "bg-green-500" : "bg-gray-300")
-                      }></div>
-                    ))}
-                  </div>
+            {/* Question number and timer */}
+            <div className="flex justify-between items-center mb-2">
+              <div className="font-bold">
+                Question {currentQuestionIdx + 1}/{quiz.questions.length}
+                <div className="flex gap-1 mt-1">
+                  {quiz.questions.map((q, idx) => (
+                    <div key={q.id} className={
+                      "w-2 h-2 rounded " +
+                      (sentQuestions.includes(idx) ? "bg-green-500" : "bg-gray-300")
+                    }></div>
+                  ))}
                 </div>
-                <div className={`px-2 py-1 rounded text-sm ${timer <= 10 ? 'bg-red-100' : 'bg-gray-100'}`}>
-                  {timer}s
-                </div>
+              </div>
+              <div className={`px-2 py-1 rounded text-sm ${timer <= 10 ? 'bg-red-100' : 'bg-gray-100'}`}>
+                {timer}s
               </div>
             </div>
-            
+
+            {/* Current Question and Options */}
             <div className="mb-3">
               <p className="font-medium mb-2">{currentQuestion.text}</p>
               <ul className="list-disc ml-4 space-y-1">
@@ -262,13 +233,14 @@ export default function AdminPage() {
               </ul>
             </div>
             
-            <div className="mb-3">
-              <div className={`inline-block px-2 py-1 rounded text-sm ${
-                peopleAnswered === noOfParticipants && noOfParticipants > 0 ? 'bg-green-100' : 'bg-gray-100'
+            {/* No of people Answered */}
+            <div className={`inline-block mb-3 px-2 py-1 rounded text-sm ${
+              peopleAnswered === noOfParticipants && noOfParticipants > 0 ? 'bg-green-100' : 'bg-gray-100'
               }`}>
-                Answered: {peopleAnswered}/{noOfParticipants}
-              </div>
+              Answered: {peopleAnswered}/{noOfParticipants}
             </div>
+            
+            {/* Time Limit Setup */}
             <label>Time: </label>
             <input
               type="text"
@@ -281,35 +253,52 @@ export default function AdminPage() {
               }}
             />
 
+            {/* Buttons */}
             <div className="flex flex-wrap gap-2">
               <button 
                 onClick={() => handleSendQuestion(time)} 
-                disabled={isTimerRunning || autoAdvanceCountdown > 0} 
+                disabled={isTimerRunning} 
                 className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
               >
                 {isTimerRunning ? 'Active' : `Send (${time}s)`}
               </button>
+
               {isTimerRunning && (
-                <button onClick={handleEndQuestion} className="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700">
+                <button onClick={handleEndQuestion} 
+                className="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700"
+                >
                   End Now
                 </button>
               )}
+
               <button 
                 onClick={handleEndQuiz} 
                 className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                disabled={autoAdvanceCountdown > 0}
+                disabled={isTimerRunning}
               >
                 End Quiz
               </button>
-              <button onClick={handlePrevQuestion} disabled={currentQuestionIdx === 0 || isTimerRunning} className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50">
+
+              <button 
+                onClick={handlePrevQuestion} 
+                disabled={currentQuestionIdx === 0 || isTimerRunning} 
+                className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+              >
                 Prev
               </button>
-              <button onClick={handleNextQuestion} disabled={currentQuestionIdx === quiz.questions.length - 1 || isTimerRunning} className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50">
+
+              <button 
+                onClick={handleNextQuestion} 
+                disabled={currentQuestionIdx === quiz.questions.length - 1 || isTimerRunning} 
+                className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+              >
                 Next
               </button>
             </div>
+            
           </div>
-          <LeaderboardCard leaderboard={leaderboard} />
+
+          <LeaderboardCard leaderboard={leaderboard} setLeaderboard={setLeaderboard} />
         </div>
       </div>
     </div>
