@@ -22,6 +22,7 @@ export default function AdminPage() {
   const [quizEnded, setQuizEnded] = useState(false)
   const [time, setTime] = useState(30)
   const socket = useSocket()
+  const location = useLocation()
 
   const handleQuestionEnded = () => {
     setPeopleAnswered(0)
@@ -57,7 +58,6 @@ export default function AdminPage() {
 
   const handleShare = async () => {
     try {
-      const location = useLocation()
       const shareUrl = `${window.location.origin}${location.pathname}`
       await navigator.share({
         title: "Quiz Room",
