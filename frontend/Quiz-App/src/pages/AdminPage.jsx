@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams,useLocation } from "react-router-dom"
 import { useSocket } from "../contexts/SocketContex"
 import LeaderboardCard from "../components/LeaderboardCard"
 import { BASE_HTTP_URL } from "../constants/Urls"
@@ -57,7 +57,8 @@ export default function AdminPage() {
 
   const handleShare = async () => {
     try {
-      const shareUrl = `https://quiz-application-8vsztes9n-gokuls-projects-f31147e3.vercel.app/${roomId}`
+      const location = useLocation()
+      const shareUrl = `${window.location.origin}${location.pathname}`
       await navigator.share({
         title: "Quiz Room",
         text: `Join my quiz room!\nRoom ID: ${roomId}\n${shareUrl}`
