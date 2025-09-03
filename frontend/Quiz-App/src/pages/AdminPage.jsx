@@ -57,7 +57,7 @@ export default function AdminPage() {
 
   const handleShare = async () => {
     try {
-      const shareUrl = `https://pf8cj6pg-5173.inc1.devtunnels.ms/${roomId}`
+      const shareUrl = `https://quiz-application-8vsztes9n-gokuls-projects-f31147e3.vercel.app/${roomId}`
       await navigator.share({
         title: "Quiz Room",
         text: `Join my quiz room!\nRoom ID: ${roomId}\n${shareUrl}`
