@@ -3,7 +3,7 @@ import { useSocket } from "../contexts/SocketContex"
 import { useEffect, useState } from "react"
 import LoadingBar from "../components/LoadingBar"
 import FinalscoreCard from "../components/FinalscoreCard"
-import { ROUTES } from "../constants/routes"
+import { ROUTES } from "../constants/Routes"
 
 export default function QuizPage() {
   const location = useLocation()
