@@ -22,7 +22,6 @@ export default function AdminPage() {
   const [quizEnded, setQuizEnded] = useState(false)
   const [time, setTime] = useState(30)
   const socket = useSocket()
-  const location = useLocation()
 
   const handleQuestionEnded = () => {
     setPeopleAnswered(0)

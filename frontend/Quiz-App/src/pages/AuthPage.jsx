@@ -30,7 +30,7 @@ export default function AuthPage() {
         console.log(response.data)
         localStorage.setItem('token', response.data.token)
         localStorage.setItem('name', response.data.name)
-        navigate(ROUTES.CREATE_QUIZ_PAGE)
+        navigate(ROUTES.MY_QUIZZES_PAGE)
       })
       .catch(error => {
         console.error(error)
