@@ -1,6 +1,6 @@
 # Quiz Application
 
-🔗 **Live Demo**: [https://quiz-application-2idfqf3ma-gokuls-projects-f31147e3.vercel.app/](https://quiz-application-2idfqf3ma-gokuls-projects-f31147e3.vercel.app/)
+🔗 **Live Demo**: [https://quiz-application-one-lyart.vercel.app/](https://quiz-application-one-lyart.vercel.app/)
 
 A real-time interactive quiz application built with React and Node.js that allows users to create, host, and participate in live quiz sessions with real-time leaderboards and scoring.
 
