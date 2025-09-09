@@ -32,7 +32,10 @@ export default function MyQuizzesPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8 px-2">
       <div className="w-full max-w-2xl bg-white rounded shadow p-6">
-        <h1 className="text-2xl mb-6">My Quizzes</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl mb-6">My Quizzes</h1>
+          <button className="mb-4 px-4 py-2 bg-blue-500 text-white rounded" onClick={() => navigate(ROUTES.CREATE_QUIZ_PAGE)}>Create New Quiz</button>
+        </div>
         {quiz && quiz.length > 0 ? (
           <ul className="space-y-4">
             {quiz.map((q) => (
