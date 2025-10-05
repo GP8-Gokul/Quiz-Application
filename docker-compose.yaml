@@ -12,17 +12,20 @@ services:
       - "3000:3000"
     env_file:
       - ./backend/.env
-    command: ["npm", "start"]  
+    command: ["npm", "run", "dev"]  
 
   frontend:
     build:
       context: ./frontend/Quiz-App
       dockerfile: Dockerfile
     volumes:
-      - ./frontend/Quiz-App:/app  
-      - /app/node_modules          
+      - ./frontend/Quiz-App/src:/app/src  
+      - ./frontend/Quiz-App/public:/app/public
+      - /app/node_modules         
     ports:
       - "5173:5173"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       - backend
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
