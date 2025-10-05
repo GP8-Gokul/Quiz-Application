@@ -1,0 +1,16 @@
+FROM node:lts-slim
+
+WORKDIR /
+
+COPY package*.json ./
+
+RUN npm install && npm audit fix
+
+COPY . .
+
+RUN npx prisma generate
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+
